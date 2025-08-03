@@ -33,13 +33,21 @@ function ModernNavbar() {
         setOpenDropdowns({});
     }, [location.pathname]);
 
-    // Effect to add/remove class from body when mobile menu is open
+    // Effect to add/remove class from body when mobile menu is open and prevent body scroll
     useEffect(() => {
         if (isMobileMenuOpen) {
             document.body.classList.add('mm-mobile-menu-open');
+            document.body.style.overflow = 'hidden';
         } else {
             document.body.classList.remove('mm-mobile-menu-open');
+            document.body.style.overflow = '';
         }
+        
+        // Cleanup on unmount
+        return () => {
+            document.body.classList.remove('mm-mobile-menu-open');
+            document.body.style.overflow = '';
+        };
     }, [isMobileMenuOpen]);
 
     // Toggles the main mobile menu
@@ -54,6 +62,9 @@ function ModernNavbar() {
         setOpenDropdowns(prev => ({ ...prev, [menuId]: !prev[menuId] }));
     };
 
+    // Helper function to convert names to slugs
+    const toSlug = (name) => name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+
     const navLinks = [
         { to: "/", label: "Home" },
         { to: "/about", label: "About" },
@@ -61,32 +72,38 @@ function ModernNavbar() {
             to: "/subjects", label: "Subjects", id: "subjects",
             sublinks: [
                 {
-                    to: "/engineering", label: "Engineering", id: "engineering",
+                    to: `/subjects/${toSlug("engineering")}`, label: "Engineering", id: "engineering",
                     sublinks: [
-                        { to: "/engineering/mechanical", label: "Mechanical Engineering" },
-                        { to: "/engineering/electrical", label: "Electrical Engineering" },
-                        { to: "/engineering/electronics", label: "Electronics Engineering" },
-                        { to: "/engineering/civil", label: "Civil Engineering" },
+                        { to: `/subjects/${toSlug("engineering")}/${toSlug("mechanical engineering")}`, label: "Mechanical Engineering" },
+                        { to: `/subjects/${toSlug("engineering")}/${toSlug("electrical engineering")}`, label: "Electrical Engineering" },
+                        { to: `/subjects/${toSlug("engineering")}/${toSlug("electronics engineering")}`, label: "Electronics Engineering" },
+                        { to: `/subjects/${toSlug("engineering")}/${toSlug("civil engineering")}`, label: "Civil Engineering" },
                     ]
                 },
                 {
-                    to: "/computer-science", label: "Computer Science & IT", id: "cs",
+                    to: `/subjects/${toSlug("computer science")}`, label: "Computer Science & IT", id: "cs",
                     sublinks: [
-                        { to: "/computer-science/coding", label: "Coding" },
-                        { to: "/computer-science/machine-learning", label: "Machine Learning" },
-                        { to: "/computer-science/data-analytics", label: "Data Analytics & Stats" },
+                        { to: `/subjects/${toSlug("computer science")}/${toSlug("coding")}`, label: "Coding" },
+                        { to: `/subjects/${toSlug("computer science")}/${toSlug("machine learning")}`, label: "Machine Learning" },
+                        { to: `/subjects/${toSlug("computer science")}/${toSlug("data analytics")}`, label: "Data Analytics & Stats" },
+                        { to: `/subjects/${toSlug("computer science")}/${toSlug("erp tools")}`, label: "ERP tools" },
+                        { to: `/subjects/${toSlug("computer science")}/${toSlug("development")}`, label: "Development" },
+                        { to: `/subjects/${toSlug("computer science")}/${toSlug("cyber security")}`, label: "Cyber Security" },
                     ]
                 },
                 {
-                    to: "/business", label: "Business & Management", id: "business",
+                    to: `/subjects/${toSlug("business")}`, label: "Business & Management", id: "business",
                     sublinks: [
-                        { to: "/business/accounting", label: "Accounting" },
-                        { to: "/business/finance", label: "Finance" },
-                        { to: "/business/marketing", label: "Marketing" },
+                        { to: `/subjects/${toSlug("business")}/${toSlug("accounting")}`, label: "Accounting" },
+                        { to: `/subjects/${toSlug("business")}/${toSlug("finance")}`, label: "Finance" },
+                        { to: `/subjects/${toSlug("business")}/${toSlug("marketing")}`, label: "Marketing" },
+                        { to: `/subjects/${toSlug("business")}/${toSlug("management")}`, label: "Management" },
+                        { to: `/subjects/${toSlug("business")}/${toSlug("economics")}`, label: "Economics" },
+                        { to: `/subjects/${toSlug("business")}/${toSlug("strategy")}`, label: "Strategy" },
                     ]
                 },
-                { to: "/medical", label: "Medical & Biology" },
-                { to: "/humanities", label: "Social Sciences & Humanities" },
+                { to: `/subjects/${toSlug("medical")}`, label: "Medical & Biology" },
+                { to: `/subjects/${toSlug("humanities")}`, label: "Social Sciences & Humanities" },
             ]
         },
         { to: "/testimonials", label: "Testimonial" },
@@ -129,6 +146,7 @@ function ModernNavbar() {
                 </div>
 
                 <nav className={`mm-nav-container ${isMobileMenuOpen ? 'open' : ''}`}>
+                    <div className="mm-nav-overlay" onClick={() => setMobileMenuOpen(false)}></div>
                     <ul className="mm-nav-list">
                         {renderNavLinks(navLinks)}
                     </ul>
@@ -140,7 +158,7 @@ function ModernNavbar() {
                         <span className="mm-contact-text">+91 12345 67890</span>
                     </a>
                     <button 
-                        className="mm-mobile-toggle" 
+                        className={`mm-mobile-toggle ${isMobileMenuOpen ? 'open' : ''}`}
                         onClick={toggleMobileMenu}
                         aria-label="Toggle navigation"
                         aria-expanded={isMobileMenuOpen}

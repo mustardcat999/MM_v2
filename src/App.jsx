@@ -75,11 +75,12 @@ function App() {
   const [lastPath, setLastPath] = useState(location.pathname); // Track the last path
 
   // Load scripts in the correct order with improved error handling
+  // Temporarily disabled to test navbar without conflicts
   const scriptStatus = useScriptManager([
-    '/assets/js/jquery.js',
-    '/assets/js/vendors.min.js',
-    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
-    '/assets/js/main.js'
+    // '/assets/js/jquery.js',
+    // '/assets/js/vendors.min.js',
+    // 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
+    // '/assets/js/main.js'
   ]);
 
   useEffect(() => {
@@ -93,12 +94,13 @@ function App() {
   }, [scriptStatus.allLoaded, scriptStatus.hasErrors]);
 
   // Force a page refresh only when the route changes
-  useEffect(() => {
-    if (location.pathname !== lastPath) {
-      setLastPath(location.pathname); // Update the last path
-      window.location.reload(); // Refresh the page
-    }
-  }, [location.pathname, lastPath]); // Trigger refresh only when the pathname changes
+  // Temporarily disabled to test navbar without page refreshes
+  // useEffect(() => {
+  //   if (location.pathname !== lastPath) {
+  //     setLastPath(location.pathname); // Update the last path
+  //     window.location.reload(); // Refresh the page
+  //   }
+  // }, [location.pathname, lastPath]); // Trigger refresh only when the pathname changes
 
   if (scriptError) {
     return (
