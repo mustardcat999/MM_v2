@@ -6,14 +6,19 @@
 
 /* --- Root Variables (from your existing style.css for consistency) --- */
 :root {
-    /* --base-color: #2946f3;
+    --base-color: #2946f3;
     --white: #ffffff;
     --black: #000000;
     --dark-gray: #232323;
     --medium-gray: #717580;
     --light-gray: #a8a8a8;
-    --dark-slate-blue: #1f232c; */
+    --dark-slate-blue: #1f232c;
     --alt-font: "Plus Jakarta Sans", sans-serif;
+}
+
+/* Body scroll lock when mobile menu is open */
+body.mm-mobile-menu-open {
+    overflow: hidden !important;
 }
 
 /* --- Header Base --- */
@@ -22,7 +27,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1000;
+    z-index: 1002; /* Highest z-index to stay above mobile menu */
     padding: 15px 0;
     transition: background-color 0.3s ease, padding 0.3s ease, box-shadow 0.3s ease;
     background-color: transparent;
@@ -208,7 +213,8 @@
     cursor: pointer;
     padding: 10px;
     margin-left: 15px;
-    z-index: 1001;
+    z-index: 1003; /* Highest to ensure it's always clickable */
+    position: relative;
 }
 
 .mm-hamburger-line {
@@ -234,17 +240,39 @@
         display: block;
     }
 
+    /* Mobile menu overlay */
+    .mm-nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: -1;
+        cursor: pointer;
+    }
+
+    .mm-nav-container.open .mm-nav-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
     .mm-nav-container {
         position: fixed;
         top: 0;
         right: -100%;
         width: 300px;
+        max-width: 85vw;
         height: 100%;
         background-color: var(--dark-slate-blue);
         box-shadow: -5px 0 25px rgba(0,0,0,0.2);
         transition: right 0.4s cubic-bezier(0.77, 0, 0.175, 1);
         padding-top: 80px;
         overflow-y: auto;
+        z-index: 1001; /* Higher than overlay */
     }
 
     .mm-nav-container.open {
@@ -263,11 +291,19 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    .mm-nav-item:last-child {
+        border-bottom: none;
+    }
+
     .mm-nav-link {
         width: 100%;
-        padding: 15px 10px;
+        padding: 15px 20px;
         justify-content: space-between;
         color: var(--white);
+        font-size: 16px;
+        min-height: 50px; /* Better touch target */
+        display: flex;
+        align-items: center;
     }
     
     .mm-header.scrolled .mm-nav-link {
@@ -287,10 +323,16 @@
         color: var(--white);
         padding: 10px;
         cursor: pointer;
+        min-width: 44px; /* Better touch target */
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .mm-dropdown-toggle i {
         transition: transform 0.3s ease;
+        font-size: 14px;
     }
 
     .mm-dropdown-toggle i.open {
@@ -304,27 +346,42 @@
         background-color: rgba(0,0,0,0.2);
         box-shadow: none;
         border-radius: 0;
-        padding: 0 0 0 20px;
+        padding: 0;
         margin-top: 0;
         opacity: 1;
         visibility: visible;
         transform: none;
         width: 100%;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        max-height: 0;
     }
 
     .mm-dropdown-menu.show {
         display: block;
+        max-height: 500px; /* Adjust based on content */
+    }
+    
+    .mm-dropdown-menu .mm-nav-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
     
     .mm-dropdown-menu .mm-nav-link {
         color: var(--light-gray);
         font-size: 15px;
-        padding: 12px 10px;
+        padding: 12px 40px; /* More indentation for sub-items */
+        min-height: 44px;
     }
     
     .mm-dropdown-menu .mm-dropdown-menu {
-         padding-left: 15px;
+        padding-left: 0;
+        background-color: rgba(0,0,0,0.1);
+    }
+    
+    .mm-dropdown-menu .mm-dropdown-menu .mm-nav-link {
+        padding-left: 60px; /* Even more indentation for sub-sub-items */
+        font-size: 14px;
     }
     
     .mm-dropdown-menu .mm-nav-link::after,
@@ -332,17 +389,29 @@
         display: none;
     }
 
-    /* Hamburger Animation */
-    .mm-nav-container.open + .mm-header-actions .mm-mobile-toggle .mm-hamburger-line:nth-child(1) {
+    /* Hamburger Animation - Fixed selector */
+    .mm-nav-container.open ~ .mm-header-actions .mm-mobile-toggle .mm-hamburger-line:nth-child(1) {
         transform: translateY(7px) rotate(45deg);
     }
-    .mm-nav-container.open + .mm-header-actions .mm-mobile-toggle .mm-hamburger-line:nth-child(2) {
+    .mm-nav-container.open ~ .mm-header-actions .mm-mobile-toggle .mm-hamburger-line:nth-child(2) {
         opacity: 0;
     }
-    .mm-nav-container.open + .mm-header-actions .mm-mobile-toggle .mm-hamburger-line:nth-child(3) {
+    .mm-nav-container.open ~ .mm-header-actions .mm-mobile-toggle .mm-hamburger-line:nth-child(3) {
         transform: translateY(-7px) rotate(-45deg);
     }
-    .mm-header.scrolled .mm-nav-container.open + .mm-header-actions .mm-mobile-toggle .mm-hamburger-line {
+    
+    /* Alternative approach - target when menu is open */
+    .mm-header .mm-mobile-toggle.open .mm-hamburger-line:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+    .mm-header .mm-mobile-toggle.open .mm-hamburger-line:nth-child(2) {
+        opacity: 0;
+    }
+    .mm-header .mm-mobile-toggle.open .mm-hamburger-line:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+    
+    .mm-header.scrolled .mm-mobile-toggle.open .mm-hamburger-line {
         background-color: var(--white); /* Keep X white when menu is open on scrolled header */
     }
 }
